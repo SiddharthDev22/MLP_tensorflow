@@ -1,13 +1,3 @@
-"""
-Copyright 2017-2022 Department of Electrical and Computer Engineering
-University of Houston, TX/USA
-**********************************************************************************
-Author:   Aryan Mobiny
-Date:     6/1/2017
-Comments: Run this file to train the Alexnet model and save the best trained model
-**********************************************************************************
-"""
-
 from datetime import datetime
 import time
 import tensorflow as tf
@@ -115,6 +105,3 @@ if __name__ == '__main__':
           num_epochs=500,
           batch_size=128,
           display=100)
-
-    for _ in range(T):
-        h = torch.matmul(W, h) + b
