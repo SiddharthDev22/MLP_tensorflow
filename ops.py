@@ -15,7 +15,7 @@ def bias_variable(name, shape):
                            initializer=initial)
 
 
-def fc_layer(bottom, out_dim, name, add_reg=False, use_relu=True):
+def fc_layer(bottom, out_dim, name, add_reg=False, nonlinearity=None, batch_normalize=False):
     """Create a fully connected layer"""
     in_dim = bottom.get_shape()[1]
     with tf.variable_scope(name):
@@ -24,8 +24,14 @@ def fc_layer(bottom, out_dim, name, add_reg=False, use_relu=True):
         biases = bias_variable(name, [out_dim])
         layer = tf.matmul(bottom, weights)
         layer += biases
-        if use_relu:
+        if batch_normalize:
+           layer = batch_norm(layer)
+
+        if nonlinearity == 'relu':
             layer = tf.nn.relu(layer)
+        elif nonlinearity == 'sigmoid':
+            layer = tf.nn.sigmoid(layer)
+
         if add_reg:
             tf.add_to_collection('weights', weights)
     return layer
@@ -43,6 +49,17 @@ def lrn(x, radius, alpha, beta, name, bias=1.0):
     return tf.nn.local_response_normalization(x, depth_radius=radius,
                                               alpha=alpha, beta=beta,
                                               bias=bias, name=name)
+
+
+
+def batch_norm(x, scope='bn'):
+
+    with tf.variable_scope(scope):
+        mean, var = tf.nn.moments(x,[0])
+        nodes = x.get_shape().as_list()[1]
+        beta = tf.Variable(tf.zeros([nodes]))
+        scale = tf.Variable(tf.ones([nodes]))
+        return tf.nn.batch_normalization(x, mean, var, beta, scale, 1e-3)
 
 
 def dropout(x, keep_prob):

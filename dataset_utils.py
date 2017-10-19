@@ -1,5 +1,6 @@
 from pyexcel_xlsx import get_data
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 
 
@@ -10,7 +11,7 @@ def onehot_encode(Y):
     Y = onehot_encoder.fit_transform(Y)
     return Y
 
-def read_dataset(filename, datasetNo=1):
+def read_dataset(filename, datasetNo=1, normalize=True):
     """ Read dataset from xlsx file"""
     sheetNo = (datasetNo - 1) * 2
     # read the excel file
@@ -20,6 +21,10 @@ def read_dataset(filename, datasetNo=1):
     Y_train = np.array(data[list(data.keys())[sheetNo]])[:, 0].astype(np.float32)
     X_valid = np.array(data[list(data.keys())[sheetNo+1]])[:, 2:].astype(np.float32)
     Y_valid = np.array(data[list(data.keys())[sheetNo+1]])[:, 0].astype(np.float32)
+
+    if normalize:
+        X_train = normalize_feat(X_train)
+        X_valid = normalize_feat(X_valid)
 
     Y_train = onehot_encode(Y_train)
     Y_valid = onehot_encode(Y_valid)
@@ -36,3 +41,7 @@ def get_next_batch(x, y, start, end):
     x_batch = x[start:end]
     y_batch = y[start:end]
     return x_batch, y_batch
+
+def normalize_feat(X):
+    """ normalize the features of set to [0 1]"""
+    return X / X.max(axis=0)

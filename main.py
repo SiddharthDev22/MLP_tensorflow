@@ -98,10 +98,12 @@ def train(X_train, Y_train,
 if __name__ == '__main__':
     # %% Loading the input data
     # datasetNo = 1, 2
-    X_train, Y_train, X_valid, Y_valid = read_dataset('Dataset.xlsx', datasetNo=1)
+    X_train, Y_train, X_valid, Y_valid = read_dataset('Dataset.xlsx',
+                                                      datasetNo=2,
+                                                      normalize=False)
 
     train(X_train, Y_train,
           X_valid, Y_valid,
-          num_epochs=500,
+          num_epochs=700,
           batch_size=128,
           display=100)

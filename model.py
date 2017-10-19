@@ -13,9 +13,10 @@ class NeuralNet:
     def __init__(self, numClass, inputSize):
         self.inputSize = inputSize
         self.numClass = numClass
-        self.h1 = 100		# Number of neurons in the first fully-connected layer
-        self.h2 = 50		# Number of neurons in the second fully-connected layer
-        self.init_lr = 0.00005	# Initial learning rate
+        self.h1 = 70		        # Number of neurons in the first fully-connected layer
+        self.h2 = 15		        # Number of neurons in the second fully-connected layer
+        self.init_lr = 0.00005	    # Initial learning rate
+
         self.x, self.y, self.keep_prob = self.create_placeholders()
 
     def create_placeholders(self):
@@ -34,12 +35,17 @@ class NeuralNet:
             return self
         # Building network...
         with tf.variable_scope('NeuralNet'):
-            net = fc_layer(self.x, self.h1, 'FC1', add_reg=False, use_relu=True)
+            net = fc_layer(self.x, self.h1, 'FC1',
+                           add_reg=False,
+                           nonlinearity='relu',
+                           batch_normalize=True)
             net = dropout(net, self.keep_prob)
-            # net = lrn(net, 2, 2e-05, 0.75, name='norm1')
-            net = fc_layer(net, self.h2, 'FC2', add_reg=False, use_relu=True)
+            net = fc_layer(net, self.h2, 'FC2',
+                           add_reg=False,
+                           nonlinearity='relu',
+                           batch_normalize=True)
             net = dropout(net, self.keep_prob)
-            net = fc_layer(net, self.numClass, 'FC3', add_reg=False, use_relu=False)
+            net = fc_layer(net, self.numClass, 'FC3', add_reg=False)
             self.__network = net
         return self
 
