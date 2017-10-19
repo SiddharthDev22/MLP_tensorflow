@@ -53,6 +53,7 @@ def train(X_train, Y_train,
                 end = (step + 1) * batch_size
                 X_batch, Y_batch = get_next_batch(X_train, Y_train, start, end)
 
+                model.is_train = True
                 feed_dict_batch = {model.x: X_batch, model.y: Y_batch, model.keep_prob: 0.8}
                 _, acc_batch, loss_batch = sess.run([model.train_op, model.accuracy, model.loss],
                                                     feed_dict=feed_dict_batch)
@@ -74,6 +75,8 @@ def train(X_train, Y_train,
                     sum_count += 1
                     acc_batch_all = loss_batch_all = np.array([])
 
+
+            model.is_train = False
             feed_dict_val = {model.x: X_valid, model.y: Y_valid, model.keep_prob: 1}
             acc_valid, loss_valid = sess.run([model.accuracy, model.loss], feed_dict=feed_dict_val)
             summary_valid = tf.Summary(value=[tf.Summary.Value(tag='Accuracy', simple_value=acc_valid)])

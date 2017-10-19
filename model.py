@@ -16,6 +16,7 @@ class NeuralNet:
         self.h1 = 70		        # Number of neurons in the first fully-connected layer
         self.h2 = 15		        # Number of neurons in the second fully-connected layer
         self.init_lr = 0.00005	    # Initial learning rate
+        self.is_train = tf.Variable(True, trainable=False, dtype=tf.bool)
 
         self.x, self.y, self.keep_prob = self.create_placeholders()
 
@@ -38,14 +39,17 @@ class NeuralNet:
             net = fc_layer(self.x, self.h1, 'FC1',
                            add_reg=False,
                            nonlinearity='relu',
-                           batch_normalize=True)
+                           batch_normalize=True,
+                           is_train=self.is_train)
             net = dropout(net, self.keep_prob)
             net = fc_layer(net, self.h2, 'FC2',
                            add_reg=False,
                            nonlinearity='relu',
-                           batch_normalize=True)
+                           batch_normalize=True,
+                           is_train=self.is_train)
             net = dropout(net, self.keep_prob)
-            net = fc_layer(net, self.numClass, 'FC3', add_reg=False)
+            net = fc_layer(net, self.numClass, 'FC3',
+                           add_reg=False)
             self.__network = net
         return self
 

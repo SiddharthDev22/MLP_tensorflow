@@ -15,7 +15,11 @@ def bias_variable(name, shape):
                            initializer=initial)
 
 
-def fc_layer(bottom, out_dim, name, add_reg=False, nonlinearity=None, batch_normalize=False):
+def fc_layer(bottom, out_dim, name,
+             add_reg=False,
+             nonlinearity=None,
+             batch_normalize=False,
+             is_train=True):
     """Create a fully connected layer"""
     in_dim = bottom.get_shape()[1]
     with tf.variable_scope(name):
@@ -24,8 +28,9 @@ def fc_layer(bottom, out_dim, name, add_reg=False, nonlinearity=None, batch_norm
         biases = bias_variable(name, [out_dim])
         layer = tf.matmul(bottom, weights)
         layer += biases
+
         if batch_normalize:
-           layer = batch_norm(layer)
+            layer = batch_norm(layer, is_train)
 
         if nonlinearity == 'relu':
             layer = tf.nn.relu(layer)
@@ -51,15 +56,24 @@ def lrn(x, radius, alpha, beta, name, bias=1.0):
                                               bias=bias, name=name)
 
 
+def batch_norm(inputs, is_training, decay=0.999, epsilon=1e-3):
+    scale = tf.Variable(tf.ones([inputs.get_shape()[-1]]))
+    beta = tf.Variable(tf.zeros([inputs.get_shape()[-1]]))
+    pop_mean = tf.Variable(tf.zeros([inputs.get_shape()[-1]]), trainable=False)
+    pop_var = tf.Variable(tf.ones([inputs.get_shape()[-1]]), trainable=False)
 
-def batch_norm(x, scope='bn'):
+    if is_training:
+        if len(inputs.get_shape().as_list()) == 4:  # For convolutional layers
+            batch_mean, batch_var = tf.nn.moments(inputs, [0, 1, 2])
+        else:                                       # For fully-connected layers
+            batch_mean, batch_var = tf.nn.moments(inputs, [0])
+        train_mean = tf.assign(pop_mean, pop_mean * decay + batch_mean * (1 - decay))
+        train_var = tf.assign(pop_var, pop_var * decay + batch_var * (1 - decay))
+        with tf.control_dependencies([train_mean, train_var]):
+            return tf.nn.batch_normalization(inputs, batch_mean, batch_var, beta, scale, epsilon)
+    else:
+        return tf.nn.batch_normalization(inputs, pop_mean, pop_var, beta, scale, epsilon)
 
-    with tf.variable_scope(scope):
-        mean, var = tf.nn.moments(x,[0])
-        nodes = x.get_shape().as_list()[1]
-        beta = tf.Variable(tf.zeros([nodes]))
-        scale = tf.Variable(tf.ones([nodes]))
-        return tf.nn.batch_normalization(x, mean, var, beta, scale, 1e-3)
 
 
 def dropout(x, keep_prob):
