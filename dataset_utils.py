@@ -30,7 +30,7 @@ def read_dataset(filename, datasetNo=1, normalize=True, type="classification"):
         Y_train = Y_train[Y_train != 0].reshape((-1, 1))
         X_valid = X_valid[Y_valid != 0, :]
         Y_valid = Y_valid[Y_valid != 0].reshape((-1, 1))
-    elif type == "classificaion":
+    elif type == "classification":
         Y_train = onehot_encode(Y_train)
         Y_valid = onehot_encode(Y_valid)
 
