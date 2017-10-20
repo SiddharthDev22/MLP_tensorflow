@@ -10,7 +10,7 @@ class NeuralNet:
     __accuracy = None        # Classification accuracy
     __probs = None           # Prediction probability matrix of shape [batch_size, numClasses]
 
-    def __init__(self, numClass, inputSize):
+    def __init__(self, inputSize, numClass=1):
         self.inputSize = inputSize
         self.numClass = numClass
         self.h1 = 70		        # Number of neurons in the first fully-connected layer
@@ -68,7 +68,8 @@ class NeuralNet:
             tf.summary.scalar('accuracy', self.__accuracy)
         return self
 
-    def loss_func(self):
+
+    def loss_classification(self):
         if self.__loss:
             return self
         with tf.name_scope('Loss'):
@@ -77,12 +78,23 @@ class NeuralNet:
             tf.summary.scalar('cross_entropy', self.__loss)
         return self
 
+
+    def loss_regression(self):
+        if self.__loss:
+            return self
+        with tf.name_scope('Loss'):
+            diff = tf.square(self.y - self.__network)
+            self.__loss = tf.sqrt(tf.reduce_mean(diff))
+            tf.summary.scalar('regression_error', self.__loss)
+        return self
+
     def train_func(self):
         if self.__train_op:
             return self
         with tf.name_scope('Train'):
             optimizer = tf.train.AdamOptimizer(learning_rate=self.init_lr)
             self.__train_op = optimizer.minimize(self.__loss)
+
         return self
 
     @property

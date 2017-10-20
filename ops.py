@@ -57,6 +57,8 @@ def lrn(x, radius, alpha, beta, name, bias=1.0):
 
 
 def batch_norm(inputs, is_training, decay=0.999, epsilon=1e-3):
+    """Perform batch normalization on convolution or fully connected layer."""
+
     scale = tf.Variable(tf.ones([inputs.get_shape()[-1]]))
     beta = tf.Variable(tf.zeros([inputs.get_shape()[-1]]))
     pop_mean = tf.Variable(tf.zeros([inputs.get_shape()[-1]]), trainable=False)
